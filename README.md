@@ -1,6 +1,6 @@
 # 🎓 📜 IITK PG Rules & FAQ Assistant | Advanced RAG System
 
-This project performs advanced **Retrieval-Augmented Generation (RAG)** to answer complex policy questions regarding the IIT Kanpur Postgraduate (PG) Manual and FAQs. The primary goal is to build a highly resilient and accurate AI assistant utilizing **Hierarchical Routing** (FAQ → PG Manual → Web Search) and a **Multi-Model Fallback Architecture** (Gemini 1.5 Flash, Gemini 1.5 Flash-8B, Groq Llama 3).
+This project performs advanced **Retrieval-Augmented Generation (RAG)** to answer complex policy questions regarding the IIT Kanpur Postgraduate (PG) Manual and FAQs. The primary goal is to build a highly resilient and accurate AI assistant utilizing **Hierarchical Routing** (FAQ → PG Manual → Web Search) and a **Multi-Model Fallback Architecture** (Gemini 1.5 Flash, Gemini 1.5 Flash-lite, Groq Llama 3).
 
 ---
 
