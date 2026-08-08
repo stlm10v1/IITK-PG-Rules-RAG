@@ -112,7 +112,7 @@ def initialize_rag_pipeline():
 
     # Build the Model Pool (Tracking the exact name of the model)
     chain_pool = []
-    gemini_keys = [os.getenv("GEMINI_API_KEY_2"), os.getenv("GEMINI_API_KEY_1")]
+    gemini_keys = [os.getenv("GEMINI_API_KEY_1"), os.getenv("GEMINI_API_KEY_2")]
     valid_g_keys = [k for k in gemini_keys if k]
     gemini_models = ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
     
@@ -265,6 +265,6 @@ if user_prompt := st.chat_input("Ask a question about IITK PG rules..."):
                 
             except Exception as e:
                 if "RESOURCE_EXHAUSTED" in str(e):
-                    st.error("🚨 **API Quota Exhausted!** \n\nAll primary and fallback LLMs have reached their daily rate limits. Please try again tomorrow or update the API keys.")
+                    st.error("🚨 **API Quota Exhausted!** \n\nAll primary and fallback LLMs have reached their daily rate limits. Please try again tomorrow.")
                 else:
                     st.error(f"An unexpected error occurred: {str(e)}")
