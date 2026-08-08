@@ -9,3 +9,5 @@ pypdf
 sentence-transformers
 python-dotenv
 duckduckgo-search
+torch
+torchvision
