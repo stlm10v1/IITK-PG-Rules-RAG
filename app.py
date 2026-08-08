@@ -163,10 +163,18 @@ def expand_query(query):
     raise Exception("RESOURCE_EXHAUSTED")
 
 def hierarchical_rag_search(query, use_web_search):
-    # Guardrail: Handle Bot Self-Introduction Queries
-    clean_q = query.lower().strip()
-    intro_triggers = ["who are you", "what are you", "what can you do", "what is this bot", "help me", "hi", "hello"]
-    if any(trigger in clean_q for trigger in intro_triggers):
+# Guardrail: Handle Bot Self-Introduction Queries
+    # Strip out punctuation so "Hi!" or "Who are you?" match perfectly
+    clean_q = query.lower().strip().replace("?", "").replace("!", "").replace(".", "")
+    
+    intro_triggers = [
+        "who are you", "what are you", "what can you do", 
+        "what is this bot", "help", "help me", 
+        "hi", "hello", "hey"
+    ]
+    
+    # EXACT MATCH: Only trigger if the user's entire query is in the trigger list
+    if clean_q in intro_triggers:
         return {
             "answer": (
                 "👋 **Hello! I am the IITK PG Rules & FAQ Assistant.**\n\n"
