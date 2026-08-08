@@ -112,7 +112,7 @@ def initialize_rag_pipeline():
 
     # Build the Model Pool (Tracking the exact name of the model)
     chain_pool = []
-    gemini_keys = [os.getenv("GEMINI_API_KEY_1"), os.getenv("GEMINI_API_KEY_2")]
+    gemini_keys = [os.getenv("GEMINI_API_KEY_2"), os.getenv("GEMINI_API_KEY_1")]
     valid_g_keys = [k for k in gemini_keys if k]
     gemini_models = ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
     
