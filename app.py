@@ -1,6 +1,6 @@
-# ===============================================
-# Streamlit Front-End for IITK PG Rules Assistant
-# ===============================================
+# ===============================
+# Streamlit Front-End (`app.py`)
+# ===============================
 import os
 import base64
 import streamlit as st
@@ -17,63 +17,65 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.tools import DuckDuckGoSearchRun
 
 # ---------------------------------------------------------
-# 1. Page Configuration & Background Image
+# 1. Page Configuration & Background Setup
 # ---------------------------------------------------------
 st.set_page_config(page_title="IITK PG Rules Assistant", page_icon="🎓", layout="centered")
 load_dotenv()
 
+# Document Hyperlinks
+FAQ_URL = "https://drive.google.com/file/d/1Sgsh7a_7_pKyr6YzKy2LiSiz-p96QEby/view?usp=sharing"
+MANUAL_URL = "https://drive.google.com/file/d/1lmb6X882qgzsEzmZwCkrQMejKIiW4ynt/view?usp=sharing"
+
+def get_secret_key(key_name):
+    """Retrieve API keys seamlessly from either local .env or Streamlit Cloud Secrets."""
+    val = os.getenv(key_name)
+    if not val and hasattr(st, "secrets") and key_name in st.secrets:
+        val = st.secrets[key_name]
+    return val
+
 def set_background(image_file):
-    with open(image_file, "rb") as f:
-        data = f.read()
-    bin_str = base64.b64encode(data).decode()
-    page_bg_img = f'''
-    <style>
-    /* Set the background image */
-    .stApp {{
-      background-image: url("data:image/jpg;base64,{bin_str}");
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-    }}
-    
-    /* 1. Make text highly visible with a thick, dark outline (multi-layered shadow) */
-    h1, h2, h3, h4, h5, h6, p, li, span, label, .stMarkdown {{
-        color: #ffffff !important;
-        text-shadow: 
-            2px 2px 4px rgba(0, 0, 0, 0.9), 
-            -1px -1px 4px rgba(0, 0, 0, 0.9),
-            0px 0px 10px rgba(0, 0, 0, 1.0) !important;
-    }}
-    
-    /* 2. Remove the solid grey background behind the bottom chat input area */
-    [data-testid="stBottom"] > div {{
-        background-color: transparent !important;
-    }}
-    
-    /* Style the actual chat input box to be semi-transparent */
-    [data-testid="stChatInput"] {{
-        background-color: rgba(0, 0, 0, 0.75) !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    }}
-    
-    /* Make the chat message bubbles semi-transparent */
-    [data-testid="stChatMessage"] {{
-        background-color: rgba(0, 0, 0, 0.65) !important;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(4px); /* Adds a nice frosted glass effect */
-    }}
-    </style>
-    '''
-    st.markdown(page_bg_img, unsafe_allow_html=True)
+    if os.path.exists(image_file):
+        with open(image_file, "rb") as f:
+            data = f.read()
+        bin_str = base64.b64encode(data).decode()
+        page_bg_img = f'''
+        <style>
+        .stApp {{
+          background-image: url("data:image/jpg;base64,{bin_str}");
+          background-size: cover;
+          background-position: center;
+          background-attachment: fixed;
+        }}
+        h1, h2, h3, h4, h5, h6, p, li, span, label, .stMarkdown {{
+            color: #ffffff !important;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.9), 
+                -1px -1px 4px rgba(0, 0, 0, 0.9),
+                0px 0px 10px rgba(0, 0, 0, 1.0) !important;
+        }}
+        [data-testid="stBottom"] > div {{
+            background-color: transparent !important;
+        }}
+        [data-testid="stChatInput"] {{
+            background-color: rgba(0, 0, 0, 0.75) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        }}
+        [data-testid="stChatMessage"] {{
+            background-color: rgba(0, 0, 0, 0.65) !important;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+        }}
+        #MainMenu {{visibility: hidden;}}
+        footer {{visibility: hidden;}}
+        </style>
+        '''
+        st.markdown(page_bg_img, unsafe_allow_html=True)
 
-
-# Ensure the image file is in the same directory as this script
-if os.path.exists("9227948.jpg"):
-    set_background("9227948.jpg")
+set_background("9227948.jpg")
 
 # ---------------------------------------------------------
-# 2. Resource Caching & Multi-Model Pool Setup
+# 2. Pipeline Initialization
 # ---------------------------------------------------------
 @st.cache_resource
 def initialize_rag_pipeline():
@@ -110,11 +112,10 @@ def initialize_rag_pipeline():
     )
     prompt = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", "{input}")])
 
-    # Build the Model Pool (Tracking the exact name of the model)
     chain_pool = []
-    gemini_keys = [os.getenv("GEMINI_API_KEY_1"), os.getenv("GEMINI_API_KEY_2")]
+    gemini_keys = [get_secret_key("GEMINI_API_KEY_1"), get_secret_key("GEMINI_API_KEY_2")]
     valid_g_keys = [k for k in gemini_keys if k]
-    gemini_models = ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+    gemini_models = ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash"]
     
     for key in valid_g_keys:
         for m in gemini_models:
@@ -125,7 +126,7 @@ def initialize_rag_pipeline():
                 "chain": create_stuff_documents_chain(llm, prompt)
             })
             
-    groq_key = os.getenv("GROQ_API_KEY")
+    groq_key = get_secret_key("GROQ_API_KEY")
     if groq_key:
         groq_llm = ChatGroq(model="llama3-8b-8192", api_key=groq_key, temperature=0, max_retries=0)
         chain_pool.append({
@@ -135,13 +136,12 @@ def initialize_rag_pipeline():
         })
 
     web_search = DuckDuckGoSearchRun()
-
     return faq_retriever, manual_retriever, chain_pool, web_search
 
 faq_retriever, manual_retriever, chain_pool, web_search_tool = initialize_rag_pipeline()
 
 # ---------------------------------------------------------
-# 3. Robust Search Logic with Explicit Model Tracking
+# 3. Hierarchical Search Logic
 # ---------------------------------------------------------
 def expand_query(query):
     expansion_prompt = (
@@ -155,7 +155,6 @@ def expand_query(query):
         f"Original Query: {query}\n"
         "Normalized Query:"
     )
-    # Loop through models until one succeeds
     for pool_item in chain_pool:
         try:
             return pool_item["llm"].invoke(expansion_prompt).content.strip()
@@ -164,9 +163,26 @@ def expand_query(query):
     raise Exception("RESOURCE_EXHAUSTED")
 
 def hierarchical_rag_search(query, use_web_search):
+    # Guardrail: Handle Bot Self-Introduction Queries
+    clean_q = query.lower().strip()
+    intro_triggers = ["who are you", "what are you", "what can you do", "what is this bot", "help me", "hi", "hello"]
+    if any(trigger in clean_q for trigger in intro_triggers):
+        return {
+            "answer": (
+                "👋 **Hello! I am the IITK PG Rules & FAQ Assistant.**\n\n"
+                "I am an AI assistant designed to help postgraduate students navigate academic policies at **IIT Kanpur**.\n\n"
+                "**What I can help you with:**\n"
+                "- 📜 **PG Manual Regulations:** Minimum CPI rules, assistantship/stipend eligibility, thesis submission timelines, course waiver conditions, and degree extensions.\n"
+                "- ❓ **FAQ Queries:** Common postgraduate administrative procedures and guidelines.\n"
+                "- 🌐 **Web Search Fallback:** External official information regarding IIT Kanpur if rules aren't found in internal documents."
+            ),
+            "source_type": "System Bot Intro",
+            "model_used": "Built-in Guardrail",
+            "context_used": []
+        }
+
     search_query = expand_query(query)
     
-    # Custom runner to execute the chain and capture the successful model name
     def run_qa_chain(context):
         for pool_item in chain_pool:
             try:
@@ -195,7 +211,7 @@ def hierarchical_rag_search(query, use_web_search):
         manual_response, model_used = run_qa_chain(manual_context)
         
         if "i do not know" in manual_response.lower().strip().replace(".", ""):
-            # Step C: Web
+            # Step C: Web Search
             if use_web_search:
                 iitk_web_query = f"{query} IIT Kanpur" if "iit" not in query.lower() else query
                 web_results = web_search_tool.invoke(iitk_web_query)
@@ -234,7 +250,7 @@ if "messages" not in st.session_state:
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+        st.markdown(message["content"], unsafe_allow_html=True)
 
 if user_prompt := st.chat_input("Ask a question about IITK PG rules..."):
     st.session_state.messages.append({"role": "user", "content": user_prompt})
@@ -248,23 +264,27 @@ if user_prompt := st.chat_input("Ask a question about IITK PG rules..."):
                 
                 formatted_response = f"{result['answer']}\n\n---\n"
                 
-                # Add Citations
-                if result['source_type'] in ["FAQ", "PG Manual"]:
-                    formatted_response += f"**Source Document:** {result['source_type']}\n\n"
+                # Add Hyperlinked Citations
+                if result['source_type'] == "FAQ":
+                    formatted_response += f"**Source Document:** [PGRules FAQ]({FAQ_URL})\n\n"
+                    for i, doc in enumerate(result['context_used']):
+                        page_num = doc.metadata.get('page', 0) + 1
+                        formatted_response += f"- Page {page_num}\n"
+                elif result['source_type'] == "PG Manual":
+                    formatted_response += f"**Source Document:** [PG Manual]({MANUAL_URL})\n\n"
                     for i, doc in enumerate(result['context_used']):
                         page_num = doc.metadata.get('page', 0) + 1
                         formatted_response += f"- Page {page_num}\n"
                 else:
                     formatted_response += f"**Source:** {result['source_type']}\n"
                 
-                # Add Model Tag (Notice the \n\n to break out of the bullet list)
-                formatted_response += f"\n\n**Generated by:** `{result['model_used']}`"
+                formatted_response += f"\n<br>\n\n**Generated by:** `{result['model_used']}`"
                 
-                st.markdown(formatted_response)
+                st.markdown(formatted_response, unsafe_allow_html=True)
                 st.session_state.messages.append({"role": "assistant", "content": formatted_response})
                 
             except Exception as e:
                 if "RESOURCE_EXHAUSTED" in str(e):
-                    st.error("🚨 **API Quota Exhausted!** \n\nAll primary and fallback LLMs have reached their daily rate limits. Please try again tomorrow.")
+                    st.error("🚨 **API Quota Exhausted!** \n\nAll primary and fallback LLMs have reached their daily rate limits. Please try again tomorrow or update the API keys.")
                 else:
                     st.error(f"An unexpected error occurred: {str(e)}")
