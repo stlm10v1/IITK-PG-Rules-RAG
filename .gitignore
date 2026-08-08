@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Custom Local Ignored Files ---
+# Ignore local vector database (Streamlit will rebuild this on cloud)
+chroma_db/
+
+# Ignore local environment variables (Use Streamlit Cloud Secrets instead)
+.env
