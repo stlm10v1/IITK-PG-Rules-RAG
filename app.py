@@ -1,6 +1,4 @@
-# ===============================
-# Streamlit Front-End (`app.py`)
-# ===============================
+# Streamlit Front-End
 import os
 import base64
 import streamlit as st
@@ -16,9 +14,9 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.tools import DuckDuckGoSearchRun
 
-# ---------------------------------------------------------
+
 # 1. Page Configuration & Background Setup
-# ---------------------------------------------------------
+
 st.set_page_config(page_title="IITK PG Rules Assistant", page_icon="🎓", layout="centered")
 load_dotenv()
 
@@ -74,9 +72,8 @@ def set_background(image_file):
 
 set_background("9227948.jpg")
 
-# ---------------------------------------------------------
 # 2. Pipeline Initialization
-# ---------------------------------------------------------
+
 @st.cache_resource
 def initialize_rag_pipeline():
     embeddings = HuggingFaceEmbeddings(
@@ -140,9 +137,8 @@ def initialize_rag_pipeline():
 
 faq_retriever, manual_retriever, chain_pool, web_search_tool = initialize_rag_pipeline()
 
-# ---------------------------------------------------------
 # 3. Hierarchical Search Logic
-# ---------------------------------------------------------
+
 def expand_query(query):
     expansion_prompt = (
         "You are a strict query normalizer for IIT Kanpur academic policies. "
@@ -244,9 +240,8 @@ def hierarchical_rag_search(query, use_web_search):
     
     return {"answer": faq_response, "source_type": "FAQ", "model_used": model_used, "context_used": faq_context}
 
-# ---------------------------------------------------------
 # 4. Streamlit UI Layout
-# ---------------------------------------------------------
+
 st.title("🎓 IITK PG Rules & FAQ Assistant")
 st.caption("Hierarchical RAG System with FAQ, PG Manual, and Enriched Web Fallback")
 
@@ -293,6 +288,6 @@ if user_prompt := st.chat_input("Ask a question about IITK PG rules..."):
                 
             except Exception as e:
                 if "RESOURCE_EXHAUSTED" in str(e):
-                    st.error("🚨 **API Quota Exhausted!** \n\nAll primary and fallback LLMs have reached their daily rate limits. Please try again tomorrow or update the API keys.")
+                    st.error("🚨 **API Quota Exhausted!** \n\nAll primary and fallback LLMs have reached their daily rate limits. Please try again tomorrow.")
                 else:
                     st.error(f"An unexpected error occurred: {str(e)}")
