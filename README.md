@@ -34,7 +34,7 @@ Try the model live here:
 
 ## 📁 Files Included
 
-* `RAG_VScode.ipynb` – Pipeline development, chunking logic, and LLM-as-a-Judge evaluation metrics
+* `PGmanual_RAG.ipynb` – Pipeline development, chunking logic, and LLM-as-a-Judge evaluation metrics
 * `app.py` – Streamlit app code for deployment and UI rendering
 * `PGRulesFAQ.pdf` & `PG-Manual.pdf` – Source documents for the vector database context
 * `9227948.jpg` – Background image for the web interface
