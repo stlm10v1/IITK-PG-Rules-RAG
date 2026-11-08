@@ -112,11 +112,20 @@ def initialize_rag_pipeline():
     chain_pool = []
     gemini_keys = [get_secret_key("GEMINI_API_KEY_1"), get_secret_key("GEMINI_API_KEY_2")]
     valid_g_keys = [k for k in gemini_keys if k]
-    gemini_models = ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash"]
+    
+    # Removed the broken 1.5 model to keep the pool clean
+    gemini_models = ["gemini-2.5-flash-lite", "gemini-2.5-flash"]
     
     for key in valid_g_keys:
         for m in gemini_models:
-            llm = ChatGoogleGenerativeAI(model=m, google_api_key=key, temperature=0, max_retries=0)
+            # FIX: Added api_version="v1beta" to support system instructions
+            llm = ChatGoogleGenerativeAI(
+                model=m, 
+                google_api_key=key, 
+                temperature=0, 
+                max_retries=0,
+                api_version="v1beta" 
+            )
             chain_pool.append({
                 "name": f"Google: {m}",
                 "llm": llm,
@@ -125,12 +134,38 @@ def initialize_rag_pipeline():
             
     groq_key = get_secret_key("GROQ_API_KEY")
     if groq_key:
-        groq_llm = ChatGroq(model="llama3-8b-8192", api_key=groq_key, temperature=0, max_retries=0)
+        # FIX: Upgraded to the new Llama 3.1 model
+        groq_llm = ChatGroq(model="llama-3.1-8b-instant", api_key=groq_key, temperature=0, max_retries=0)
         chain_pool.append({
-            "name": "Groq: Llama 3 (8B)",
+            "name": "Groq: Llama 3.1 (8B)",
             "llm": groq_llm,
             "chain": create_stuff_documents_chain(groq_llm, prompt)
         })
+
+
+    
+    # chain_pool = []
+    # gemini_keys = [get_secret_key("GEMINI_API_KEY_1"), get_secret_key("GEMINI_API_KEY_2")]
+    # valid_g_keys = [k for k in gemini_keys if k]
+    # gemini_models = ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash"]
+    
+    # for key in valid_g_keys:
+    #     for m in gemini_models:
+    #         llm = ChatGoogleGenerativeAI(model=m, google_api_key=key, temperature=0, max_retries=0)
+    #         chain_pool.append({
+    #             "name": f"Google: {m}",
+    #             "llm": llm,
+    #             "chain": create_stuff_documents_chain(llm, prompt)
+    #         })
+            
+    # groq_key = get_secret_key("GROQ_API_KEY")
+    # if groq_key:
+    #     groq_llm = ChatGroq(model="llama3-8b-8192", api_key=groq_key, temperature=0, max_retries=0)
+    #     chain_pool.append({
+    #         "name": "Groq: Llama 3 (8B)",
+    #         "llm": groq_llm,
+    #         "chain": create_stuff_documents_chain(groq_llm, prompt)
+    #     })
 
     web_search = DuckDuckGoSearchRun()
     return faq_retriever, manual_retriever, chain_pool, web_search
