@@ -190,15 +190,28 @@ def hierarchical_rag_search(query, use_web_search):
 
     search_query = expand_query(query)
     
+    # def run_qa_chain(context):
+    #     for pool_item in chain_pool:
+    #         try:
+    #             response = pool_item["chain"].invoke({"input": query, "context": context})
+    #             return response, pool_item["name"]
+    #         except:
+    #             continue
+    #     raise Exception("RESOURCE_EXHAUSTED")
+
+
     def run_qa_chain(context):
+        error_logs = []
         for pool_item in chain_pool:
             try:
                 response = pool_item["chain"].invoke({"input": query, "context": context})
                 return response, pool_item["name"]
-            except:
+            except Exception as e:
+                error_logs.append(f"{pool_item['name']} failed: {str(e)}")
                 continue
-        raise Exception("RESOURCE_EXHAUSTED")
+        raise Exception(f"QA_CHAIN_ERROR: {error_logs}")
 
+    
     def run_web_llm(web_prompt):
         for pool_item in chain_pool:
             try:
