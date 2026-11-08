@@ -151,12 +151,15 @@ def expand_query(query):
         f"Original Query: {query}\n"
         "Normalized Query:"
     )
+    error_logs = []
     for pool_item in chain_pool:
         try:
             return pool_item["llm"].invoke(expansion_prompt).content.strip()
-        except:
+        except Exception as e:
+            error_logs.append(f"{pool_item['name']} failed: {str(e)}")
             continue
-    raise Exception("RESOURCE_EXHAUSTED")
+            
+    raise Exception(f"RESOURCE_EXHAUSTED. Hidden Errors: {error_logs}")
 
 def hierarchical_rag_search(query, use_web_search):
 # Guardrail: Handle Bot Self-Introduction Queries
