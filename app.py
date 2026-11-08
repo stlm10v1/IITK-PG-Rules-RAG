@@ -159,7 +159,7 @@ def expand_query(query):
             error_logs.append(f"{pool_item['name']} failed: {str(e)}")
             continue
             
-    raise Exception(f"RESOURCE_EXHAUSTED. Hidden Errors: {error_logs}")
+    raise Exception(f"DEBUG_ERROR: {error_logs}")
 
 def hierarchical_rag_search(query, use_web_search):
 # Guardrail: Handle Bot Self-Introduction Queries
