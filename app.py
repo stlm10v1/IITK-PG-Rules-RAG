@@ -1,4 +1,4 @@
-# Streamlit Front-End
+# Streamlit UI Front-End
 import os
 import base64
 import streamlit as st
