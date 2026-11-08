@@ -290,7 +290,8 @@ if user_prompt := st.chat_input("Ask a question about IITK PG rules..."):
                 st.session_state.messages.append({"role": "assistant", "content": formatted_response})
                 
             except Exception as e:
-                if "RESOURCE_EXHAUSTED" in str(e):
-                    st.error("🚨 **API Quota Exhausted!** \n\nAll primary and fallback LLMs have reached their daily rate limits. Please try again tomorrow.")
-                else:
-                    st.error(f"An unexpected error occurred: {str(e)}")
+                st.error(f"SYSTEM ERROR: {str(e)}")
+                # if "RESOURCE_EXHAUSTED" in str(e):
+                #     st.error("🚨 **API Quota Exhausted!** \n\nAll primary and fallback LLMs have reached their daily rate limits. Please try again tomorrow.")
+                # else:
+                #     st.error(f"An unexpected error occurred: {str(e)}")
