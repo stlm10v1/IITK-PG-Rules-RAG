@@ -135,7 +135,7 @@ def initialize_rag_pipeline():
     groq_key = get_secret_key("GROQ_API_KEY")
     if groq_key:
         # FIX: Upgraded to the new Llama 3.1 model
-        groq_llm = ChatGroq(model="llama-3.1-8b-instant", api_key=groq_key, temperature=0, max_retries=0)
+        groq_llm = ChatGroq(model="openai/gpt-oss-20b", api_key=groq_key, temperature=0, max_retries=0)
         chain_pool.append({
             "name": "Groq: Llama 3.1 (8B)",
             "llm": groq_llm,
